@@ -1,0 +1,45 @@
+﻿@page "/"
+
+@inject ILogViewerService LogViewerService
+
+<div class="input-container">
+    <RadzenTextArea Style="width: 100%" Rows="5" Change=@(args => OnTextAreaChange(args, "TextArea"))></RadzenTextArea>
+</div>
+
+<div class="result-container">
+    <RadzenDataGrid TItem="Log" Data="@Logs" Visible="true" AllowSorting="true"
+                    AllowFiltering="true" AllowPaging="true" PageSize="10">
+        <Template Context="log">
+            <RadzenCard Style="margin-bottom: 20px; max-width: 100%;">
+                Exception:
+                <div style="word-break: break-all">
+                    <b>@((MarkupString)log.Exception?.Message)</b>
+                </div>
+            </RadzenCard>
+        </Template>
+        <Columns>
+            <RadzenDataGridColumn TItem="Log" Property="LogLevel" Title="Log Level" Width="85px">
+                <Template Context="log">
+                    @if (log.LogLevel == "ERROR")
+                    {
+                        <span class="badge badge-danger">@log.LogLevel</span>
+                    }
+                    else if (log.LogLevel == "WARN")
+                    {
+                        <span class="badge badge-warning">@log.LogLevel</span>
+                    }
+                </Template>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TItem="Log" Property="Message" Title="Message" />
+        </Columns>
+    </RadzenDataGrid>
+</div>
+
+@code {
+    IEnumerable<Log> Logs { get; set; } = Enumerable.Empty<Log>();
+
+    void OnTextAreaChange(string value, string name)
+    {
+        Logs = LogViewerService.GetLogs(value) ?? Enumerable.Empty<Log>();
+    }
+}
